@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LayoutDashboard, Image as ImageIcon, Settings, User as UserIcon, Zap, LogOut, ChevronRight } from 'lucide-react';
 import { User } from '../types';
@@ -5,9 +6,11 @@ import { User } from '../types';
 interface SidebarProps {
   user: User | null;
   onLogout: () => void;
+  currentView: 'dashboard' | 'project' | 'editor';
+  onNavigate: (view: 'dashboard' | 'project' | 'editor') => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, currentView, onNavigate }) => {
   return (
     <div className="hidden md:flex flex-col w-64 h-screen bg-slate-950 border-r border-slate-800 fixed left-0 top-0 z-50">
       {/* Logo Area */}
@@ -28,18 +31,33 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
         <div className="px-2 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
             Menu
         </div>
-        <a href="#" className="flex items-center space-x-3 px-3 py-2.5 bg-blue-500/10 text-cyan-400 rounded-lg border border-blue-500/20">
+        
+        <button 
+          onClick={() => onNavigate('editor')}
+          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors text-left
+            ${currentView === 'editor' && !user /* Hack: logic handled in parent */
+              ? 'bg-blue-500/10 text-cyan-400 border border-blue-500/20' 
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+        >
           <ImageIcon size={18} />
           <span className="font-medium">Virtual Staging</span>
-        </a>
-        <a href="#" className="flex items-center space-x-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors">
+        </button>
+
+        <button 
+          onClick={() => onNavigate('dashboard')}
+          className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-colors text-left
+            ${currentView === 'dashboard' || currentView === 'project'
+              ? 'bg-blue-500/10 text-cyan-400 border border-blue-500/20' 
+              : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}
+        >
           <LayoutDashboard size={18} />
           <span className="font-medium">Projects</span>
-        </a>
-        <a href="#" className="flex items-center space-x-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors">
+        </button>
+
+        <button className="w-full flex items-center space-x-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors text-left">
           <Settings size={18} />
           <span className="font-medium">Settings</span>
-        </a>
+        </button>
       </nav>
 
       {/* Credits Card */}

@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Button from '../Button';
 import BeforeAfterSlider from '../BeforeAfterSlider';
-import { Download, RotateCcw, CheckCircle, Share2, Sparkles, Wand2, RefreshCw, Send, Type } from 'lucide-react';
+import { Download, RotateCcw, CheckCircle, Share2, Sparkles, Wand2, RefreshCw, Send, Type, FolderPlus, Plus, ChevronDown, Check, ChevronRight } from 'lucide-react';
+import { Project } from '../../types';
 
 interface ResultStepProps {
   uploadedImage: string | null;
@@ -11,6 +12,8 @@ interface ResultStepProps {
   onRefine: (instructions: string) => void;
   onRegenerate: () => void;
   isProcessing?: boolean;
+  projects: Project[];
+  onSaveToProject: (projectId: string | null, newProjectTitle?: string) => void;
 }
 
 type WatermarkType = 'enhanced' | 'staged' | 'custom';
@@ -21,7 +24,9 @@ const ResultStep: React.FC<ResultStepProps> = ({
   onReset,
   onRefine,
   onRegenerate,
-  isProcessing = false
+  isProcessing = false,
+  projects,
+  onSaveToProject
 }) => {
   const [viewMode, setViewMode] = useState<'compare' | 'result'>('compare');
   const [refineText, setRefineText] = useState('');
@@ -30,6 +35,21 @@ const ResultStep: React.FC<ResultStepProps> = ({
   const [showWatermark, setShowWatermark] = useState(false);
   const [watermarkType, setWatermarkType] = useState<WatermarkType>('staged');
   const [customWatermarkText, setCustomWatermarkText] = useState('Designed by One Roof');
+
+  // Save to Project State
+  const [isSaveMenuOpen, setIsSaveMenuOpen] = useState(false);
+  const [newProjectTitle, setNewProjectTitle] = useState('');
+  const saveMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (saveMenuRef.current && !saveMenuRef.current.contains(event.target as Node)) {
+        setIsSaveMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (!generatedImage) return null;
 
@@ -107,9 +127,6 @@ const ResultStep: React.FC<ResultStepProps> = ({
         const xPos = canvas.width - paddingX;
         const yPos = canvas.height - paddingY;
 
-        // Simulate wide tracking (Canvas doesn't support letter-spacing universally yet)
-        // We add thin hair spaces if needed, or just rely on the font
-        // For this MVP, standard text rendering with the right font looks clean.
         ctx.fillText(text, xPos, yPos);
         
         // Trigger Download
@@ -122,7 +139,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
         document.body.removeChild(link);
       }
     };
-    img.crossOrigin = "anonymous"; // Handle potential CORS if image comes from external URL
+    img.crossOrigin = "anonymous"; 
     img.src = generatedImage;
   };
 
@@ -131,6 +148,12 @@ const ResultStep: React.FC<ResultStepProps> = ({
       onRefine(refineText);
       setRefineText('');
     }
+  };
+
+  const handleCreateNewProject = () => {
+      if (newProjectTitle.trim()) {
+          onSaveToProject(null, newProjectTitle);
+      }
   };
 
   return (
@@ -288,17 +311,77 @@ const ResultStep: React.FC<ResultStepProps> = ({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-center border-t border-slate-800/50 pt-8">
-        <Button variant="secondary" onClick={onReset} className="w-full sm:w-auto">
+        
+        {/* Reset / Start Over */}
+        <Button variant="ghost" onClick={onReset} className="w-full sm:w-auto text-slate-400 hover:text-white">
           <RotateCcw className="mr-2 h-4 w-4" />
-          New Project
+          Start Over
         </Button>
-        <Button onClick={handleDownload} className="w-full sm:w-auto shadow-cyan-500/20">
+
+        {/* Save To Project Dropdown */}
+        <div className="relative w-full sm:w-auto" ref={saveMenuRef}>
+            <Button 
+                variant="primary" 
+                onClick={() => setIsSaveMenuOpen(!isSaveMenuOpen)} 
+                className="w-full sm:w-auto shadow-cyan-500/20"
+            >
+                <FolderPlus className="mr-2 h-4 w-4" />
+                Save to Project
+                <ChevronDown className={`ml-2 h-4 w-4 transition-transform ${isSaveMenuOpen ? 'rotate-180' : ''}`} />
+            </Button>
+
+            {isSaveMenuOpen && (
+                <div className="absolute bottom-full mb-3 left-0 sm:left-1/2 sm:-translate-x-1/2 w-full sm:w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1 z-50 animate-in fade-in slide-in-from-bottom-2">
+                    
+                    {/* Create New Section */}
+                    <div className="p-3 border-b border-slate-800">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block">New Project</label>
+                        <div className="flex space-x-2">
+                            <input 
+                                type="text"
+                                placeholder="e.g. 123 Main St..."
+                                value={newProjectTitle}
+                                onChange={(e) => setNewProjectTitle(e.target.value)}
+                                className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 outline-none"
+                            />
+                            <button 
+                                onClick={handleCreateNewProject}
+                                disabled={!newProjectTitle.trim()}
+                                className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white rounded-lg p-2 transition-colors"
+                            >
+                                <Plus size={18} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Existing Projects List */}
+                    <div className="max-h-56 overflow-y-auto custom-scrollbar p-1">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 py-2 block">Existing Projects</label>
+                        {projects.length === 0 ? (
+                            <div className="text-slate-500 text-sm text-center py-4 italic">No existing projects</div>
+                        ) : (
+                            <div className="space-y-1">
+                                {projects.map(p => (
+                                    <button 
+                                        key={p.id}
+                                        onClick={() => onSaveToProject(p.id)}
+                                        className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white text-sm flex items-center justify-between transition-colors group"
+                                    >
+                                        <span className="truncate">{p.title}</span>
+                                        <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-500" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+
+        {/* Download Button */}
+        <Button variant="secondary" onClick={handleDownload} className="w-full sm:w-auto">
           <Download className="mr-2 h-4 w-4" />
-          Download {showWatermark ? 'with Watermark' : 'High-Res'}
-        </Button>
-        <Button variant="outline" className="w-full sm:w-auto">
-            <Share2 className="mr-2 h-4 w-4" />
-            Share
+          Download
         </Button>
       </div>
     </div>

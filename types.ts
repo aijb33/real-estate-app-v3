@@ -35,6 +35,27 @@ export interface StagingState {
   error: string | null;
 }
 
+// Project System Types
+export type ImageStatus = 'original' | 'processing' | 'staged';
+
+export interface ProjectImage {
+  id: string;
+  originalUrl: string; // base64 for now
+  stagedUrl?: string; // base64
+  status: ImageStatus;
+  name: string;
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  address: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  images: ProjectImage[];
+  coverImage?: string;
+}
+
 export const STYLES: StyleOption[] = [
   // Exterior Styles
   { 
