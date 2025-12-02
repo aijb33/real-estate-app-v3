@@ -367,7 +367,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
                                         onClick={() => onSaveToProject(p.id)}
                                         className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white text-sm flex items-center justify-between transition-colors group"
                                     >
-                                        <span className="truncate">{p.title}</span>
+                                        <span className="truncate">{p.street}</span>
                                         <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-500" />
                                     </button>
                                 ))}

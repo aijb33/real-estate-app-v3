@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { Home, Armchair, ChevronRight } from 'lucide-react';
 import { StagingType } from '../../types';
+import Button from '../Button';
 
 interface CategoryStepProps {
   selectedType: StagingType | null;
@@ -11,13 +13,13 @@ interface CategoryStepProps {
 
 const CategoryStep: React.FC<CategoryStepProps> = ({ selectedType, onSelectType, onNext, onBack }) => {
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in h-full flex flex-col">
       <div className="text-center md:text-left">
         <h2 className="text-3xl font-bold text-white mb-2">What are we enhancing?</h2>
         <p className="text-slate-400">Select the type of transformation required for this project.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
         {/* Exterior Card */}
         <button
           onClick={() => onSelectType('exterior')}
@@ -85,20 +87,20 @@ const CategoryStep: React.FC<CategoryStepProps> = ({ selectedType, onSelectType,
         </button>
       </div>
 
-      <div className="flex justify-between pt-6 border-t border-slate-800/50">
-        <button 
+      <div className="flex justify-between pt-6 border-t border-slate-800/50 mt-auto">
+        <Button 
+          variant="ghost"
           onClick={onBack}
-          className="px-6 py-3 text-slate-400 font-medium hover:text-white transition-colors"
         >
           Back
-        </button>
-        <button 
+        </Button>
+        <Button 
+          variant="primary"
           onClick={onNext}
           disabled={!selectedType}
-          className="px-8 py-3 bg-white text-slate-950 font-bold rounded-xl hover:bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-white disabled:opacity-30 disabled:cursor-not-allowed shadow-lg"
         >
           Continue
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -21,11 +21,19 @@ type View = 'dashboard' | 'project' | 'editor';
 const SAMPLE_PROJECTS: Project[] = [
     {
         id: 'sample-1',
-        title: '101 Ocean Drive',
-        address: '101 Ocean Dr, Miami, FL 33139',
+        street: '101 Ocean Drive',
+        city: 'Miami',
+        state: 'FL',
+        zip: '33139',
         createdAt: new Date(),
         images: [],
-        coverImage: 'https://images.unsplash.com/photo-1600596542815-e328700336f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' // Placeholder
+        coverImage: 'https://images.unsplash.com/photo-1600596542815-e328700336f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+        constructionStatus: 'existing',
+        propertyType: 'residential',
+        isAgeRestricted: false,
+        isAuction: false,
+        features: 'Ocean view, infinity pool, marble floors',
+        description: ''
     }
 ];
 
@@ -72,14 +80,13 @@ function App() {
 
   // --- PROJECT ACTIONS ---
   
-  const handleCreateProject = () => {
-    // In a real app, this would be a modal form. For MVP, we auto-create.
+  const handleCreateProject = (data: Omit<Project, 'id' | 'createdAt' | 'images'>) => {
     const newProject: Project = {
         id: Date.now().toString(),
-        title: `New Listing ${projects.length + 1}`,
-        address: 'Pending Address...',
         createdAt: new Date(),
-        images: []
+        images: [],
+        description: '',
+        ...data
     };
     setProjects([newProject, ...projects]);
     setActiveProject(newProject);
@@ -91,7 +98,7 @@ function App() {
     setView('project');
   };
 
-  const handleUpdateProject = (id: string, data: { title: string; address: string }) => {
+  const handleUpdateProject = (id: string, data: Partial<Project>) => {
     setProjects(projects.map(p => 
         p.id === id ? { ...p, ...data, updatedAt: new Date() } : p
     ));
@@ -186,15 +193,26 @@ function App() {
               updatedAt: new Date()
           };
       } else {
-          // Create new project
+          // Create new project with defaults for new required fields
+          // Note: Quick save currently uses the Title string for street, needs full form in future iteration
           targetProject = {
               id: Date.now().toString(),
-              title: newProjectTitle || 'New Virtual Staging Project',
-              address: 'Address pending...',
+              street: newProjectTitle || 'New Virtual Staging Project',
+              city: 'Unknown',
+              state: 'NY',
+              zip: '00000',
               createdAt: new Date(),
               updatedAt: new Date(),
               images: [newImage],
-              coverImage: state.generatedImage // Set the staged image as cover
+              coverImage: state.generatedImage, // Set the staged image as cover
+              
+              // Defaults for quick save (User should edit these later in settings)
+              constructionStatus: 'existing',
+              propertyType: 'residential',
+              isAgeRestricted: false,
+              isAuction: false,
+              features: '',
+              description: ''
           };
       }
 
@@ -385,6 +403,7 @@ function App() {
                   onAddImage={handleAddImageToProject}
                   onStageImage={handleStageProjectImage}
                   onDeleteImage={handleDeleteImage}
+                  onUpdateProject={handleUpdateProject}
               />
           )}
 
@@ -400,7 +419,7 @@ function App() {
                              {activeProject ? '← Back to Project' : '← Back Home'}
                         </button>
                         <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-                            {activeProject ? `Editing: ${activeProject.title}` : 'New Transformation'}
+                            {activeProject ? `Editing: ${activeProject.street}` : 'New Transformation'}
                         </h1>
                     </div>
                     
@@ -427,7 +446,10 @@ function App() {
                 </div>
 
                 {/* Workflow Card */}
-                <div className="bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-white/5 shadow-2xl overflow-hidden min-h-[600px] relative animate-fade-in">
+                <div className="bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl shadow-cyan-900/10 overflow-hidden min-h-[600px] relative animate-fade-in ring-1 ring-white/5">
+                    
+                    {/* Decorative Top Line */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-cyan-400" />
                     
                     {/* Loading Overlay */}
                     {state.isGenerating && (

@@ -46,15 +46,57 @@ export interface ProjectImage {
   name: string;
 }
 
+export type ConstructionStatus = 'existing' | 'new_construction';
+export type PropertyType = 'residential' | 'commercial' | 'land';
+
+export interface AuctionDetails {
+  date: string;
+  type: string;
+  premium: string;
+}
+
 export interface Project {
   id: string;
-  title: string;
-  address: string;
+  // Replaced title/address with structured fields
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  
   createdAt: Date;
   updatedAt?: Date;
   images: ProjectImage[];
   coverImage?: string;
+  
+  // Legal & Form Info
+  constructionStatus: ConstructionStatus;
+  propertyType: PropertyType;
+  isAgeRestricted: boolean;
+  isAuction: boolean;
+  auctionDetails?: AuctionDetails;
+  features: string; // "Actual Features to Highlight"
+  description?: string; // AI Generated Description
 }
+
+export const US_STATES = [
+    { value: 'AL', label: 'Alabama' }, { value: 'AK', label: 'Alaska' }, { value: 'AZ', label: 'Arizona' },
+    { value: 'AR', label: 'Arkansas' }, { value: 'CA', label: 'California' }, { value: 'CO', label: 'Colorado' },
+    { value: 'CT', label: 'Connecticut' }, { value: 'DE', label: 'Delaware' }, { value: 'FL', label: 'Florida' },
+    { value: 'GA', label: 'Georgia' }, { value: 'HI', label: 'Hawaii' }, { value: 'ID', label: 'Idaho' },
+    { value: 'IL', label: 'Illinois' }, { value: 'IN', label: 'Indiana' }, { value: 'IA', label: 'Iowa' },
+    { value: 'KS', label: 'Kansas' }, { value: 'KY', label: 'Kentucky' }, { value: 'LA', label: 'Louisiana' },
+    { value: 'ME', label: 'Maine' }, { value: 'MD', label: 'Maryland' }, { value: 'MA', label: 'Massachusetts' },
+    { value: 'MI', label: 'Michigan' }, { value: 'MN', label: 'Minnesota' }, { value: 'MS', label: 'Mississippi' },
+    { value: 'MO', label: 'Missouri' }, { value: 'MT', label: 'Montana' }, { value: 'NE', label: 'Nebraska' },
+    { value: 'NV', label: 'Nevada' }, { value: 'NH', label: 'New Hampshire' }, { value: 'NJ', label: 'New Jersey' },
+    { value: 'NM', label: 'New Mexico' }, { value: 'NY', label: 'New York' }, { value: 'NC', label: 'North Carolina' },
+    { value: 'ND', label: 'North Dakota' }, { value: 'OH', label: 'Ohio' }, { value: 'OK', label: 'Oklahoma' },
+    { value: 'OR', label: 'Oregon' }, { value: 'PA', label: 'Pennsylvania' }, { value: 'RI', label: 'Rhode Island' },
+    { value: 'SC', label: 'South Carolina' }, { value: 'SD', label: 'South Dakota' }, { value: 'TN', label: 'Tennessee' },
+    { value: 'TX', label: 'Texas' }, { value: 'UT', label: 'Utah' }, { value: 'VT', label: 'Vermont' },
+    { value: 'VA', label: 'Virginia' }, { value: 'WA', label: 'Washington' }, { value: 'WV', label: 'West Virginia' },
+    { value: 'WI', label: 'Wisconsin' }, { value: 'WY', label: 'Wyoming' }
+];
 
 export const STYLES: StyleOption[] = [
   // Exterior Styles
@@ -75,7 +117,7 @@ export const STYLES: StyleOption[] = [
   },
   { 
     id: 'exterior-modern-luxury', 
-    type: 'exterior',
+    type: 'exterior', 
     name: 'Modern Luxury', 
     description: 'High-end aesthetic with manicured grounds and modern exterior finishes.', 
     previewColor: 'bg-cyan-700' 

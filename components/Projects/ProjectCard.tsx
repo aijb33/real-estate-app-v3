@@ -1,20 +1,25 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Project } from '../../types';
+import { Project, US_STATES } from '../../types';
 import { Image as ImageIcon, Calendar, MapPin, ChevronRight, MoreVertical, Edit2, Trash2, Check, X } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
   onClick: () => void;
-  onUpdate?: (id: string, data: { title: string; address: string }) => void;
+  onUpdate?: (id: string, data: Partial<Project>) => void;
   onDelete?: (id: string) => void;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onUpdate, onDelete }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(project.title);
-  const [editAddress, setEditAddress] = useState(project.address);
+  
+  // Edit States
+  const [editStreet, setEditStreet] = useState(project.street);
+  const [editCity, setEditCity] = useState(project.city);
+  const [editState, setEditState] = useState(project.state);
+  const [editZip, setEditZip] = useState(project.zip);
+
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
@@ -31,15 +36,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onUpdate, o
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onUpdate) {
-      onUpdate(project.id, { title: editTitle, address: editAddress });
+      onUpdate(project.id, { 
+          street: editStreet,
+          city: editCity,
+          state: editState,
+          zip: editZip
+      });
     }
     setIsEditing(false);
   };
 
   const handleCancel = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setEditTitle(project.title);
-    setEditAddress(project.address);
+    setEditStreet(project.street);
+    setEditCity(project.city);
+    setEditState(project.state);
+    setEditZip(project.zip);
     setIsEditing(false);
   };
 
@@ -60,7 +72,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onUpdate, o
         {project.coverImage ? (
           <img 
             src={project.coverImage} 
-            alt={project.title} 
+            alt={project.street} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
@@ -90,7 +102,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onUpdate, o
                         onClick={(e) => { e.stopPropagation(); setIsEditing(true); setIsMenuOpen(false); }}
                         className="w-full text-left px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white flex items-center"
                     >
-                        <Edit2 size={14} className="mr-2" /> Edit
+                        <Edit2 size={14} className="mr-2" /> Edit Info
                     </button>
                     <button 
                         onClick={handleDelete}
@@ -109,19 +121,36 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onUpdate, o
             <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                 <input 
                     type="text" 
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
+                    value={editStreet}
+                    onChange={(e) => setEditStreet(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-white text-sm focus:border-cyan-500 outline-none"
-                    placeholder="Project Title"
+                    placeholder="Street Address"
                     autoFocus
                 />
+                <div className="flex gap-2">
+                    <input 
+                        type="text" 
+                        value={editCity}
+                        onChange={(e) => setEditCity(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-300 text-xs focus:border-cyan-500 outline-none"
+                        placeholder="City"
+                    />
+                     <select
+                        value={editState}
+                        onChange={(e) => setEditState(e.target.value)}
+                        className="w-20 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-300 text-xs focus:border-cyan-500 outline-none"
+                    >
+                        {US_STATES.map(s => <option key={s.value} value={s.value}>{s.value}</option>)}
+                    </select>
+                </div>
                 <input 
                     type="text" 
-                    value={editAddress}
-                    onChange={(e) => setEditAddress(e.target.value)}
+                    value={editZip}
+                    onChange={(e) => setEditZip(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-300 text-xs focus:border-cyan-500 outline-none"
-                    placeholder="Address"
+                    placeholder="Zip Code"
                 />
+
                 <div className="flex justify-end space-x-2 pt-1">
                     <button onClick={handleCancel} className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400">
                         <X size={16} />
@@ -134,16 +163,16 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, onUpdate, o
         ) : (
             <>
                 <h3 className="text-xl font-bold text-white mb-1 truncate group-hover:text-cyan-400 transition-colors">
-                  {project.title}
+                  {project.street}
                 </h3>
                 
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center text-sm text-slate-400">
-                    <MapPin size={14} className="mr-2 text-slate-500" />
-                    <span className="truncate">{project.address}</span>
+                    <MapPin size={14} className="mr-2 text-slate-500 flex-shrink-0" />
+                    <span className="truncate">{project.city}, {project.state} {project.zip}</span>
                   </div>
                   <div className="flex items-center text-sm text-slate-400">
-                    <Calendar size={14} className="mr-2 text-slate-500" />
+                    <Calendar size={14} className="mr-2 text-slate-500 flex-shrink-0" />
                     <span>{project.createdAt.toLocaleDateString()}</span>
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -13,10 +14,12 @@ const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props 
 }) => {
-  const baseStyles = "relative inline-flex items-center justify-center px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden";
+  const baseStyles = "relative inline-flex items-center justify-center px-6 py-3 text-sm font-bold tracking-wide rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden";
   
   const variants = {
-    primary: "text-white bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 shadow-lg shadow-cyan-500/20 border border-transparent hover:scale-[1.02]",
+    // New "Neon/Glow" style matching Sidebar Tabs
+    primary: "text-cyan-400 bg-blue-950/30 border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:bg-cyan-500/10 hover:text-cyan-300 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(34,211,238,0.3)] backdrop-blur-md",
+    
     secondary: "text-white bg-slate-800 hover:bg-slate-700 border border-slate-700",
     outline: "border border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white bg-transparent",
     ghost: "text-slate-400 hover:text-white hover:bg-slate-800/50",
@@ -41,7 +44,7 @@ const Button: React.FC<ButtonProps> = ({
       
       {/* Subtle shine effect for primary buttons */}
       {variant === 'primary' && !disabled && !isLoading && (
-        <div className="absolute inset-0 -translate-x-full group-hover:animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent z-10" />
+        <div className="absolute inset-0 -translate-x-full group-hover:animate-shimmer bg-gradient-to-r from-transparent via-cyan-400/10 to-transparent z-10" />
       )}
     </button>
   );

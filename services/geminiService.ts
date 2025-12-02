@@ -1,6 +1,6 @@
 
 import { GoogleGenAI } from "@google/genai";
-import { StyleOption } from "../types";
+import { StyleOption, Project } from "../types";
 
 // Initialize the client with the environment variable
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -196,3 +196,43 @@ ${instructions}
     throw error;
   }
 };
+
+/**
+ * Generates a professional real estate listing description.
+ */
+export const generateListingDescription = async (project: Project): Promise<string> => {
+    try {
+        const prompt = `
+You are a professional, top-tier Real Estate Copywriter. Write a compelling, SEO-friendly listing description for the following property.
+
+PROPERTY DETAILS:
+- Address: ${project.street}, ${project.city}, ${project.state} ${project.zip}
+- Property Type: ${project.propertyType}
+- Construction Status: ${project.constructionStatus === 'existing' ? 'Existing Home (Emphasize character/potential)' : 'New Construction/To-Be-Built (Emphasize pristine condition/customization)'}
+- Key Features: ${project.features}
+
+MANDATORY COMPLIANCE RULES (You must include these if applicable):
+${project.isAgeRestricted ? '- This property is in a 55+ Age Restricted Community. You MUST mention this explicitly.' : ''}
+${project.isAuction ? `- This is an AUCTION property. Date: ${project.auctionDetails?.date}. Type: ${project.auctionDetails?.type}. Buyer Premium: ${project.auctionDetails?.premium}. You MUST disclose these terms.` : ''}
+${project.propertyType === 'land' ? '- This is Vacant Land. Mention potential for building.' : ''}
+
+TONE:
+Professional, inviting, luxurious, and persuasive. Avoid generic clichés.
+`;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+        });
+
+        if (response.text) {
+            return response.text;
+        }
+
+        throw new Error("No text generated");
+
+    } catch (error) {
+        console.error("Description Generation Error:", error);
+        throw error;
+    }
+}
